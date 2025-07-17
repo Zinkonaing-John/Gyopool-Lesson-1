@@ -5,6 +5,7 @@ import Weather from "./weather";
 export default function App() {
   const [tasks, setTasks] = useState([]);
   const [input, setInput] = useState("");
+  const [filter, setFilter] = useState("all");
 
   const addTask = () => {
     if (!input.trim()) return;
@@ -18,56 +19,70 @@ export default function App() {
     setTasks(newTasks);
   };
 
-  const showAll = () => setFilter("all");
-  const showDone = () => setFilter("done");
-  const showNotDone = () => setFilter("notDone");
-
-  const [filter, setFilter] = useState("all");
-
   const filteredTasks = tasks.filter((task) => {
     if (filter === "done") return task.done;
     if (filter === "notDone") return !task.done;
     return true;
   });
 
-  const total = tasks.reduce((sum) => sum + 1, 0);
+  const total = tasks.length;
+  const doneCount = tasks.filter((task) => task.done).length;
 
   return (
     <div className="app">
-      <h1>📝 To-Do + Weather</h1>
-
-      <input
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        placeholder="Enter a task"
-      />
-      <button onClick={addTask}>Add</button>
-
-      <div>
-        {filteredTasks.map((task, index) => (
-          <div
-            key={index}
-            onClick={() => toggleDone(index)}
-            style={{
-              textDecoration: task.done ? "line-through" : "none",
-              color: task.done ? "green" : "black",
-              cursor: "pointer",
-              margin: "5px 0",
-            }}
-          >
-            {task.text}
+      <div className="container">
+        <div className="todo-section">
+          <h1 className="title">📝 To-Do List</h1>
+          <div className="input-container">
+            <input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyPress={(e) => e.key === "Enter" && addTask()}
+              placeholder="Add a new task..."
+            />
+            <button onClick={addTask}>Add</button>
           </div>
-        ))}
+          <div className="filters">
+            <button
+              className={filter === "all" ? "active" : ""}
+              onClick={() => setFilter("all")}
+            >
+              All
+            </button>
+            <button
+              className={filter === "notDone" ? "active" : ""}
+              onClick={() => setFilter("notDone")}
+            >
+              To Do
+            </button>
+            <button
+              className={filter === "done" ? "active" : ""}
+              onClick={() => setFilter("done")}
+            >
+              Done
+            </button>
+          </div>
+          <div className="task-list">
+            {filteredTasks.map((task, index) => (
+              <div
+                key={index}
+                className={`task-item ${task.done ? "done" : ""}`}
+                onClick={() => toggleDone(tasks.indexOf(task))}
+              >
+                <span>{task.text}</span>
+              </div>
+            ))}
+          </div>
+          <div className="task-summary">
+            <span>
+              {doneCount} / {total} Done
+            </span>
+          </div>
+        </div>
+        <div className="weather-section">
+          <Weather />
+        </div>
       </div>
-      <Weather />
-
-      <div style={{ marginTop: "10px" }}>
-        <button onClick={showAll}>Show All</button>
-        <button onClick={showDone}>Done</button>
-        <button onClick={showNotDone}>Not Done</button>
-      </div>
-
-      <h3>Total Tasks: {total}</h3>
     </div>
   );
 }
